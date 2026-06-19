@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIMAN</title>
+
+    <link rel="icon" type="image/png" href="other icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Gravitas+One&family=Hahmlet:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --rp: min(95vw / 2240, 95vh / 1440); 
+            --grid-spacing-x: calc(320 * var(--rp)); 
+            --grid-spacing-y: calc(240 * var(--rp)); 
+            --dot-size: calc(4 * var(--rp)); 
+            --dot-color: #1a1a1a;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0; 
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #e7e7e4;; 
+            display: flex; 
+            justify-content: center; 
+            min-height: 100vh; 
+            overflow-y: auto; 
+        }
+
+        .web-canvas {
+            position: relative;
+            width: calc(2240 * var(--rp)); 
+            min-height: 100vh;
+            background-color: #fcfcfc;
+            box-shadow: 0 calc(40 * var(--rp)) calc(100 * var(--rp)) rgba(0, 0, 0, 0.08); 
+            display: flex;
+            flex-direction: column; 
+        }
+
+        /* 첫 화면 */
+        .hero-section {
+            width: 100%;
+            height: calc(1440 * var(--rp)); 
+            position: relative;
+            background-image: radial-gradient(circle, var(--dot-color) var(--dot-size), transparent var(--dot-size));
+            background-size: var(--grid-spacing-x) var(--grid-spacing-y);
+            background-position: calc(var(--grid-spacing-x) / -2) calc(var(--grid-spacing-y) / -2);
+        }
+
+        .sticky-menu-wrapper { position: sticky; top: 0; z-index: 100; height: 0; width: 100%; }
+
+        .top-menu {
+            position: absolute;
+            top: calc(80 * var(--rp));   
+            right: calc(80 * var(--rp)); 
+            text-align: right; 
+        }
+
+        .menu-title {
+            font-family: 'Gravitas One', cursive;
+            font-size: calc(44 * var(--rp)); 
+            margin-bottom: calc(24 * var(--rp)); 
+            letter-spacing: calc(2 * var(--rp)); 
+        }
+
+        .menu-list { list-style: none; padding: 0; margin: 0; }
+        .menu-list li {
+            font-family: 'Hahmlet', serif;
+            margin-bottom: calc(20 * var(--rp)); 
+            font-size: calc(32 * var(--rp)); 
+            cursor: pointer;
+            color: #333;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, var(--grid-spacing-x));
+            grid-template-rows: repeat(4, var(--grid-spacing-y));
+            width: 100%; height: 100%;
+            padding: var(--grid-spacing-y) var(--grid-spacing-x);
+            position: absolute;
+        }
+
+        .photo-cell {
+            padding: calc(24 * var(--rp)); 
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .photo-cell img {
+            width: 100%; height: 100%; object-fit: contain; 
+            mix-blend-mode: multiply; 
+            cursor: pointer;
+            transition: transform 0.4s;
+        }
+        .photo-cell img:hover { transform: scale(1.15); }
+
+        /* 글자가 들어갈 셀 스타일 */
+        .letter-cell {
+            font-family: 'Gravitas One', cursive;
+            font-size: calc(120 * var(--rp));
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 영수증 */
+        .intro-section {
+            padding: calc(200 * var(--rp)) 0;
+            display: flex; justify-content: center;
+        }
+        .receipt {
+            width: calc(800 * var(--rp));
+            background-color: #fff;
+            padding: calc(100 * var(--rp));
+            box-shadow: 0 calc(20 * var(--rp)) calc(60 * var(--rp)) rgba(0,0,0,0.06);
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .receipt-header { text-align: center; margin-bottom: calc(60 * var(--rp)); }
+        .receipt-header h2 { font-family: 'Gravitas One', cursive; font-size: calc(56 * var(--rp)); margin: 0; }
+        .receipt-divider { border-bottom: calc(4 * var(--rp)) dashed #000; margin: calc(40 * var(--rp)) 0; }
+        .receipt-item { display: flex; justify-content: space-between; font-size: calc(32 * var(--rp)); margin-bottom: calc(24 * var(--rp)); }
+        .receipt-total { display: flex; justify-content: space-between; font-size: calc(40 * var(--rp)); font-weight: bold; margin: calc(40 * var(--rp)) 0; }
+
+        /* 매거진 텍스트 섹션 */
+        .magazine-section {
+            padding: calc(200 * var(--rp)) calc(400 * var(--rp));
+            font-size: calc(40 * var(--rp));
+            line-height: 2;
+            color: #1a1a1a;
+            white-space: pre-line;
+        }
+
+        /* 정적 그리드 배경 및 스타일 */
+        .static-grid {
+            width: 100%;
+            height: calc(1440 * var(--rp));
+            position: relative;
+            background-image: radial-gradient(circle, var(--dot-color) var(--dot-size), transparent var(--dot-size));
+            background-size: var(--grid-spacing-x) var(--grid-spacing-y);
+            background-position: calc(var(--grid-spacing-x) / -2) calc(var(--grid-spacing-y) / -2);
+            margin-top: calc(100 * var(--rp));
+        }
+
+        .static-container {
+            display: grid;
+            grid-template-columns: repeat(5, var(--grid-spacing-x));
+            grid-template-rows: repeat(4, var(--grid-spacing-y));
+            width: 100%;
+            height: 100%;
+            padding: var(--grid-spacing-y) var(--grid-spacing-x);
+            position: absolute; 
+            top: 0;
+            left: 0;
+        }
+
+        /* 푸터 */
+        .global-footer {
+            padding: calc(100 * var(--rp));
+            font-size: calc(24 * var(--rp)); 
+            color: #777; 
+            border-top: 1px solid #ddd;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="web-canvas">
+        <div class="sticky-menu-wrapper">
+            <header class="top-menu">
+                <div class="menu-title">MENU</div>
+                <ul class="menu-list">
+                    <li id="nav-intro">미만 소개</li>
+                    <li id="nav-map">식당 찾기</li>
+                </ul>
+            </header>
+        </div>
+
+        <section class="hero-section">
+            <main class="grid-container"></main>
+        </section>
+
+        <section id="intro-section" class="intro-section">
+            <div class="receipt">
+                <div class="receipt-header">
+                    <h2>MIMAN</h2>
+                </div>
+                <div class="receipt-divider"></div>
+                <div class="receipt-item"><span>Kimchi Jjigae</span><span>8,000W</span></div>
+                <div class="receipt-item"><span>Bibimbap</span><span>8,500W</span></div>
+                <div class="receipt-item"><span>Tteokbokki</span><span>4,500W</span></div>
+                <div class="receipt-item"><span>Gimbap</span><span>3,500W</span></div>
+                <div class="receipt-item"><span>Donkatsu</span><span>9,500W</span></div>
+                <div class="receipt-divider"></div>
+                <div class="receipt-total"><span>EVERYTHING</span><span>UNDER 10K</span></div>
+            </div>
+        </section>
+
+<section class="magazine-section" style="padding:0;background:#fcfcfc;">
+    <div style="width:100%;display:flex;flex-direction:column;align-items:center;">
+
+        <img src="MacBook Pro 16_ - 1.jpg"
+             style="width:100%;height:auto;display:block;">
+
+        <div style="
+            min-height:100vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            text-align:center;
+            padding:8vh 10vw;
+        ">
+            <div style="
+                font-family:'Noto Sans KR',sans-serif;
+                font-size:calc(56 * var(--rp));
+                line-height:1.5;
+                max-width:1200px;
+            ">
+                혹시 오늘 다양한 이유로 식사를 거르거나 대충 때우진 않았나요?
+                <br><br>
+                돈이 부족해서, 혼밥이 애매해서, 맛이 없어서......
+            </div>
+        </div>
+
+        <img src="MacBook Pro 16_ - 2.jpg"
+             style="width:100%;height:auto;display:block;">
+
+        <img src="MacBook Pro 16_ - 3.jpg"
+             style="width:100%;height:auto;display:block;">
+
+    </div>
+
+        <section id="guide-section" class="magazine-section" style="padding:0;background:#fcfcfc;">
+        <div style="width:100%;display:flex;flex-direction:column;align-items:center;">
+                <div style="
+                    font-family:'Noto Sans KR',sans-serif;
+                    font-size:calc(56/1.5 * var(--rp));
+                    line-height:0.8;
+                    max-width:1200px;
+                ">
+                    아래 움직이는 음식 카드를 클릭하면 이동합니다.
+                </div>
+            </div>
+        </section>
+
+</section>
+
+        <section id="map-section" class="hero-section static-grid">
+            <div class="static-container"></div>
+        </section>
+
+
+        <footer class="global-footer">
+            <p>© 2026 웹인터랙션디자인 - MIMAN. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.getElementById('nav-intro').addEventListener('click', () => {
+            document.getElementById('intro-section').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        document.getElementById('nav-map').addEventListener('click', () => {
+            document.getElementById('map-section').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        const items = ['kr.png', 'jp.png', 'cn.png', 'eu.png', 'other.png', 'M', 'I', 'M', 'A', 'N'];
+        const gridContainer = document.querySelector('.hero-section .grid-container');
+
+        // 1. 모든 가능한 그리드 좌표 생성
+        const allCells = [];
+        for (let c = 1; c <= 5; c++) {
+            for (let r = 1; r <= 4; r++) {
+                if ((c === 4 || c === 5) && r === 1) continue; // 메뉴 영역 제외
+                allCells.push({ c, r });
+            }
+        }
+
+        // 2. 초기 아이템 배치 (이미지 또는 텍스트)
+        items.forEach((item) => {
+            const div = document.createElement('div');
+            // 이미지면 photo-cell, 글자면 letter-cell 클래스 부여
+            div.className = item.endsWith('.png') ? 'photo-cell' : 'letter-cell';
+            
+            if (item.endsWith('.png')) {
+                const img = document.createElement('img');
+                img.src = item;
+                div.appendChild(img);
+            } else {
+                div.textContent = item;
+            }
+            gridContainer.appendChild(div);
+        });
+
+        // 3. 그리드를 섞고 위치만 업데이트하는 함수 (상단 그리드만 타겟팅)
+        function shuffleGrid() {
+            allCells.sort(() => Math.random() - 0.5);
+            
+            // 💡 .hero-section 내부에 있는 요소들만 선택
+            const cells = document.querySelectorAll('.hero-section .photo-cell, .hero-section .letter-cell');
+            
+            cells.forEach((cell, index) => {
+                cell.style.gridColumn = allCells[index].c;
+                cell.style.gridRow = allCells[index].r;
+            });
+        }
+
+        // 💡 누락되었던 애니메이션 실행 코드 추가 (웹사이트 실행 즉시 1회 섞기 + 0.8초마다 반복)
+        shuffleGrid();
+        setInterval(shuffleGrid, 800);
+
+        const bottomContainer = document.querySelector('.static-container');
+        const bottomImages = ['kr card.png', 'jp card.png', 'cn card.png', 'eu card.png'];
+        const bottomCells = [...allCells].sort(() => Math.random() - 0.5).slice(0, 4);
+
+        bottomImages.forEach((src, index) => {
+            const div = document.createElement('div');
+            div.className = 'photo-cell';
+            div.style.gridColumn = bottomCells[index].c;
+            div.style.gridRow = bottomCells[index].r;
+
+            div.style.cursor = 'pointer';
+            div.addEventListener('click', () => {
+                window.location.href = 'menus.html';
+            });
+
+            const img = document.createElement('img');
+            img.src = src;
+            div.appendChild(img);
+            bottomContainer.appendChild(div);
+        });
+    </script>
+</body>
+</html>

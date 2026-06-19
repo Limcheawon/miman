@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIMAN</title>
+
+    <link rel="icon" type="image/png" href="other icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Gravitas+One&family=Hahmlet:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --rp: min(95vw / 2240, 95vh / 1440); 
+            --grid-spacing-x: calc(320 * var(--rp)); 
+            --grid-spacing-y: calc(240 * var(--rp)); 
+            --dot-size: calc(4 * var(--rp)); 
+            --dot-color: #1a1a1a;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0; 
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #e7e7e4; /* index.html 배경색 */
+            display: flex; 
+            justify-content: center; 
+            min-height: 100vh; 
+            overflow-y: auto; 
+        }
+
+        .web-canvas {
+            position: relative;
+            width: calc(2240 * var(--rp)); 
+            min-height: 100vh;
+            background-color: #fcfcfc;
+            box-shadow: 0 calc(40 * var(--rp)) calc(100 * var(--rp)) rgba(0, 0, 0, 0.08); 
+            display: flex;
+            flex-direction: column; 
+        }
+
+        /* 공통 헤더 메뉴 (index.html과 동일) */
+        .sticky-menu-wrapper { position: sticky; top: 0; z-index: 100; height: 0; width: 100%; }
+
+        .top-menu {
+            position: absolute;
+            top: calc(80 * var(--rp));   
+            right: calc(80 * var(--rp)); 
+            text-align: right; 
+        }
+
+        .menu-title {
+            font-family: 'Gravitas One', cursive;
+            font-size: calc(44 * var(--rp)); 
+            margin-bottom: calc(24 * var(--rp)); 
+            letter-spacing: calc(2 * var(--rp)); 
+        }
+
+        .menu-list { list-style: none; padding: 0; margin: 0; }
+        .menu-list li {
+            font-family: 'Hahmlet', serif;
+            margin-bottom: calc(20 * var(--rp)); 
+            font-size: calc(32 * var(--rp)); 
+            cursor: pointer;
+            color: #333;
+        }
+        .menu-list li a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* 기본 내용이 들어갈 섹션 영역 */
+        .content-section {
+            width: 100%;
+            flex-grow: 1; /* 푸터를 밀어내기 위해 남은 공간 채움 */
+            padding-top: calc(150 * var(--rp)); /* 상단 여백 확보 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 공통 푸터 (index.html과 동일) */
+        .global-footer {
+            padding: calc(100 * var(--rp));
+            font-size: calc(24 * var(--rp)); 
+            color: #777; 
+            border-top: 1px solid #ddd;
+            margin-top: auto;
+        }
+
+        .menu-image-container {
+            display: grid;
+            grid-template-columns: repeat(3, max-content);
+            column-gap: calc(80 * var(--rp));
+            row-gap: calc(60 * var(--rp));
+            justify-content: center;
+            max-width: calc(1800 * var(--rp));
+        }
+        
+        .menu-image-container > a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .menu-image-container img {
+            width: calc(300 * var(--rp));
+            height: calc(300 * var(--rp));
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: calc(20 * var(--rp));
+            cursor: default;
+        }
+
+        /* 3. 버튼 텍스트를 제대로 불러오도록 수정 (data-name 활용) */
+        .menu-image-container > a::after {
+            content: attr(data-name); /* img가 아닌 a 태그의 data-name 속성을 읽어옵니다 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: calc(300 * var(--rp)); 
+            height: calc(80 * var(--rp)); 
+            border: calc(2 * var(--rp)) solid #1a1a1a; 
+            font-size: calc(36*0.9 * var(--rp)); 
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 350;
+            color: #1a1a1a;
+            background-color: transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        /* 버튼 위에 마우스를 올렸을 때 효과 */
+        .menu-image-container > a:hover::after {
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="web-canvas">
+        <div class="sticky-menu-wrapper">
+            <header class="top-menu">
+                <div class="menu-title">MENU</div>
+                <ul class="menu-list">
+                    <li><a href="index.html">돌아가기</a></li>
+                </ul>
+            </header>
+        </div>
+
+        <section class="content-section">
+            <div class="menu-image-container">
+                <a href="rice.html" data-name="밥은화"><img src="rice.png" alt="밥은화"></a>
+                <a href="dubi.html" data-name="뚜비뚜밥스"><img src="dubi.png" alt="뚜비뚜밥스"></a>
+                <a href="noodles.html" data-name="명이손칼국수"><img src="noodles.png" alt="명이손칼국수"></a>
+                
+                <a href="cheese.html" data-name="치즈밥있슈"><img src="cheese.png" alt="치즈밥있슈"></a>
+                <a href="cold.html" data-name="삼구랭면"><img src="cold.png" alt="삼구랭면"></a>
+            </div>
+        </section>
+        <footer class="global-footer">
+            <p>© 2026 웹인터랙션디자인 - MIMAN. All rights reserved.</p>
+        </footer>
+    </div>
+
+</body>
+</html>
