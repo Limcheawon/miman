@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIMAN - 치즈밥있슈</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Gravitas+One&family=Hahmlet:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --rp: min(95vw / 2240, 95vh / 1440); 
+            --grid-spacing-x: calc(320 * var(--rp)); 
+            --grid-spacing-y: calc(240 * var(--rp)); 
+            --dot-size: calc(4 * var(--rp)); 
+            --dot-color: #1a1a1a;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0; 
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #e7e7e4; 
+            display: flex; 
+            justify-content: center; 
+            min-height: 100vh; 
+            overflow-y: auto; 
+        }
+
+        .web-canvas {
+            position: relative;
+            width: calc(2240 * var(--rp)); 
+            min-height: 100vh;
+            background-color: #fcfcfc;
+            box-shadow: 0 calc(40 * var(--rp)) calc(100 * var(--rp)) rgba(0, 0, 0, 0.08); 
+            display: flex;
+            flex-direction: column; 
+            overflow: hidden;
+        }
+
+        .top-feature {
+            width: 100%;
+            position: relative;
+            padding: calc(160 * var(--rp)) 0 calc(80 * var(--rp));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-image: radial-gradient(circle, var(--dot-color) var(--dot-size), transparent var(--dot-size));
+            background-size: var(--grid-spacing-x) var(--grid-spacing-y);
+            background-position: calc(var(--grid-spacing-x) / -2) calc(var(--grid-spacing-y) / -2);
+        }
+
+        .food-title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: calc(140 * var(--rp));
+            font-weight: 900;
+            color: #1a1a1a;
+            margin: 0 0 calc(60 * var(--rp)) 0;
+            letter-spacing: calc(-4 * var(--rp));
+            text-align: center;
+            background: #fcfcfc; /* 글자 뒤 배경을 가려 가독성 확보 */
+            padding: 0 calc(40 * var(--rp));
+            border: calc(4 * var(--rp)) solid #1a1a1a;
+        }
+
+        .main-photo-wrapper {
+            position: relative;
+            width: calc(1800 * var(--rp));
+            height: calc(1000 * var(--rp));
+            border: calc(2 * var(--rp)) solid #1a1a1a;
+            background: #eee;
+        }
+
+        .main-photo-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .article-section {
+            width: calc(1200 * var(--rp));
+            margin: calc(160 * var(--rp)) auto;
+            position: relative;
+            font-size: calc(44 * var(--rp));
+            line-height: 2;
+            color: #1a1a1a;
+            font-family: 'Hahmlet', serif;
+        }
+
+        .article-section p {
+            margin-bottom: calc(60 * var(--rp));
+            text-align: justify;
+        }
+
+        .index-label {
+            position: absolute;
+            background: #fff;
+            border: calc(2 * var(--rp)) solid #1a1a1a;
+            padding: calc(12 * var(--rp)) calc(24 * var(--rp));
+            font-family: 'Gravitas One', Courier, monospace;
+            font-size: calc(26 * var(--rp));
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: calc(12 * var(--rp));
+            box-shadow: calc(6 * var(--rp)) calc(6 * var(--rp)) 0 rgba(0,0,0,0.1);
+            z-index: 10;
+            white-space: pre-line;
+            line-height: 1.3;
+        }
+
+        .index-label .sq {
+            width: calc(16 * var(--rp));
+            height: calc(16 * var(--rp));
+            background-color: #1a1a1a;
+        }
+
+        .lbl-1 { top: calc(-80 * var(--rp)); left: calc(-200 * var(--rp)); }
+        .lbl-2 { top: 40%; right: calc(-280 * var(--rp)); }
+        .lbl-3 { bottom: calc(-60 * var(--rp)); left: calc(100 * var(--rp)); }
+
+        .slider-section {
+            width: 100%;
+            padding: calc(100 * var(--rp));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: calc(60 * var(--rp));
+            margin-bottom: calc(100 * var(--rp));
+            border-top: calc(2 * var(--rp)) dashed #ccc;
+        }
+
+        .slider-wrapper {
+            width: calc(900 * var(--rp));
+            height: calc(1300 * var(--rp));
+            position: relative;
+            overflow: hidden;
+            background: #eee;
+            border: calc(2 * var(--rp)) solid #1a1a1a;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            transition: opacity 0.5s ease-in-out;
+            opacity: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ddd;
+        }
+
+        .slide.active { opacity: 1; z-index: 1; }
+        .slide img { width: 100%; height: 100%; object-fit: cover; }
+
+        .slider-controls {
+            display: flex;
+            gap: calc(40 * var(--rp));
+            font-family: 'Gravitas One', cursive;
+        }
+
+        .btn {
+            cursor: pointer;
+            padding: calc(16 * var(--rp)) calc(48 * var(--rp));
+            border: calc(2 * var(--rp)) solid #1a1a1a;
+            background: transparent;
+            font-size: calc(32 * var(--rp));
+            color: #1a1a1a;
+            transition: all 0.3s;
+        }
+        .btn:hover { background: #1a1a1a; color: #fff; }
+
+        .global-footer {
+            padding: calc(100 * var(--rp));
+            font-size: calc(24 * var(--rp)); 
+            color: #777; 
+            border-top: 1px solid #ddd;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="web-canvas">
+
+        <section class="top-feature">
+            <h1 class="food-title">삼구랭면 공릉도깨비시장점</h1>
+            <div class="main-photo-wrapper">
+                <img src="cold.png" alt="메인 음식 사진">
+                
+                <div class="index-label" style="bottom: calc(40 * var(--rp)); right: calc(-60 * var(--rp));">
+                    <div class="sq"></div>
+                    <span>4,900₩</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="article-section">
+
+            <div class="index-label lbl-1">
+                <div class="sq"></div>
+                <div class="sq"></div>
+                <span>CONTEXT</span>
+            </div>
+
+            <div class="index-label lbl-2">
+                <div class="sq"></div>
+                <span>RATINGS:<br>4 / 5</span>
+            </div>
+
+            <div class="index-label lbl-3">
+                <span>PHOTO<br>REVIEW</span>
+                <div class="sq"></div>
+            </div>
+
+            <p>
+                위치: 서울 노원구 동일로178길 19-38 (도깨비시장 연결 골목길)
+                <br>키오스크 주문 / 픽업대에서 직접 픽업
+                <br>쾌적하고 꽤 넓은 가게 내부다. 창가를 향한 1인석 4개, 최대 4인 테이블도 10개 이상 넉넉하게 확보되어 있다.
+                <br>키오스크에서 미리 재료(오이, 무)를 뺄지 말지를 결정할 수 있어 좋았다. 이외에 우동과 떡국 등 다양한 메뉴가 준비되어 있다.
+            </p>
+            <p>
+                물냉면(4,900₩)을 주문했다. 
+                <br>(곱빼기 +1,000₩, 포장 +500₩)
+                <br>살얼음이 동동 떠 있는 시원한 물냉면이다. 육수를 한 입 마셔보면 담백한 맛이었다. 자극적이지 않고 깔끔한 고기 육수 느낌이라,
+                <br>슴슴하고 시원한 맛을 즐기는 사람도 아주 맛있게 먹을 수 있을 것 같다. 당연히 겨자 등 각종 조미료도 구비되어 있다.
+                <br>곱빼기 아닌 기본 면 양도 보통에서 조금 많은 편이라 꽤 든든했다.
+                <br>무엇보다 가격이 아주 착하다. 냉면 한 그릇을 오천 원에 해결할 수 있다는 점에서 점수를 더 주고 싶다.
+                <br>평점: 4 / 5
+            </p>
+        </section>
+
+        <section class="slider-section">
+            <div class="slider-wrapper" id="slider">
+            <div class="slide active"><img src="cold4.jpg" alt="디테일 컷 1"></div>
+            <div class="slide"><img src="cold5.jpg" alt="디테일 컷 2"></div>
+            <div class="slide"><img src="cold1.jpg" alt="디테일 컷 3"></div>
+            <div class="slide"><img src="cold2.jpg" alt="디테일 컷 3"></div>
+            <div class="slide"><img src="cold3.jpg" alt="디테일 컷 3"></div>
+            <div class="slide"><img src="cold6.jpg" alt="디테일 컷 3"></div>
+            </div>
+
+            <div class="slider-controls">
+                <button class="btn" onclick="prevSlide()">PREV</button>
+                <button class="btn" onclick="nextSlide()">NEXT</button>
+            </div>
+        </section>
+
+
+        <footer class="global-footer">
+            <p>© 2026 웹인터랙션디자인 - MIMAN. All rights reserved.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        let currentIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                if (index === currentIndex) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+        }
+
+        function nextSlide() {
+            currentIndex = (currentIndex + 1) % slides.length;
+            updateSlide();
+        }
+
+        function prevSlide() {
+            currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+            updateSlide();
+        }
+    </script>
+</body>
+</html>
